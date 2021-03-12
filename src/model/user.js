@@ -16,11 +16,13 @@ const user = mongoose.Schema({
     }
 })
 
-user.methods.generateToken = function () {
+user.methods.generateToken = async function () {
     const user = this;
     const token = jwt.sign({ id: user._id }, "Bhanu@8247065499")
     return token;
 }
+
+
 
 user.pre('save', async function (next) {
     try {
@@ -32,6 +34,13 @@ user.pre('save', async function (next) {
     }
 
 })
+
+user.methods.toJSON = function () {
+    const user = this
+    const userObj = user.toObject()
+    delete userObj.password
+    return userObj
+}
 
 const User = mongoose.model('User', user)
 

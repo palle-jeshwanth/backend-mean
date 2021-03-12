@@ -1,7 +1,7 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
 const router = express.Router()
-
+const verifyToken = require('../middleware/auth')
 const User = require('../model/user')
 
 router.post('/', async (req, res, next) => {
@@ -28,7 +28,7 @@ router.post('/', async (req, res, next) => {
 
 })
 
-router.get('/', async (req, res, next) => {
+router.get('/',verifyToken, async (req, res, next) => {
    try {
       const users = await User.find({})
       if (!users.length) {
@@ -70,7 +70,7 @@ router.post('/login', async (req, res, next) => {
             message: 'Incorrect Password'
          })
       }
-      const token = user.generateToken()
+      const token = await user.generateToken()
       res.send({
          status: 'Success',
          code: 1,
@@ -100,7 +100,7 @@ router.post('/register', async (req, res, next) => {
       if (!user) {
          return res.status(404)
       }
-      return res.send({
+      res.send({
          status: 'success',
          code: 1,
          data: user,
@@ -111,6 +111,28 @@ router.post('/register', async (req, res, next) => {
 
    }
 
+})
+
+router.delete('/:id', async (req, res, next) => {
+   try {
+      const user = await User.findByIdAndDelete({ _id: req.params.id })
+      if (!user) {
+         return res.send({
+            status: "failure",
+            code: 0,
+            data: null,
+            message: "user not found"
+         })
+      }
+      return res.send({
+         status: "success",
+         code: 1,
+         data: user,
+         message: "user deleted successfully"
+      })
+   } catch (error) {
+      res.status(500).send('Internal server error')
+   }
 })
 
 module.exports = router;
