@@ -135,4 +135,31 @@ router.delete('/:id', async (req, res, next) => {
    }
 })
 
+router.post('/verify', async (req, res, next) => {
+   try {
+      console.log();
+      const user = await User.findOne({email:req.body.email})
+      if (!user) {
+         return res.send({
+            status: 'failure',
+            code: 0,
+            data: user,
+            message: 'Email does not exists please create one '
+         })
+        
+      }
+      res.send({
+         status: 'success',
+         code: 1,
+         data: user,
+         message: 'Email exists'   
+      })
+   } catch (error) {
+
+   }
+
+})
+
+router.post('/changePassword')
+
 module.exports = router;
