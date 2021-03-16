@@ -28,7 +28,7 @@ router.post('/', async (req, res, next) => {
 
 })
 
-router.get('/',verifyToken, async (req, res, next) => {
+router.get('/', verifyToken, async (req, res, next) => {
    try {
       const users = await User.find({})
       if (!users.length) {
@@ -138,7 +138,7 @@ router.delete('/:id', async (req, res, next) => {
 router.post('/verify', async (req, res, next) => {
    try {
       console.log();
-      const user = await User.findOne({email:req.body.email})
+      const user = await User.findOne({ email: req.body.email })
       if (!user) {
          return res.send({
             status: 'failure',
@@ -146,13 +146,13 @@ router.post('/verify', async (req, res, next) => {
             data: user,
             message: 'Email does not exists please create one '
          })
-        
+
       }
       res.send({
          status: 'success',
          code: 1,
          data: user,
-         message: 'Email exists'   
+         message: 'Email exists'
       })
    } catch (error) {
 
@@ -160,6 +160,87 @@ router.post('/verify', async (req, res, next) => {
 
 })
 
-router.post('/changePassword')
+router.post('/changePassword', async (req, res, next) => {
+   try {
+      let user = await User.findOneAndUpdate({ email: req.body.email }, { password: req.body.password }, { new: true })
+      if (!user) {
+         return res.send({
+            status: 'failuer',
+            code: 0,
+            data: null,
+            message: "User not found"
+         })
+      }
+      // user.password = req.body.password
+      // console.log(user)
+      user = await user.save()
+      res.send({
+         status: 'Success',
+         code: 1,
+         data: user,
+         message: "Password Updated successfully"
+      })
+   } catch (error) {
+
+   }
+})
+
+router.post('/resetpassword', verifyToken, async (req, res, next) => {
+   try {
+      const isMatched = await bcrypt.compare(req.body.oldPassword, req.user.password)
+      if (!isMatched) {
+         return res.send({
+            status: 'Failure',
+            code: 0,
+            data: null,
+            message: 'Old Password is Incorrect'
+         })
+      }
+      req.user.password = req.body.newPassword
+      await req.user.save()
+      res.send({
+         status: 'Success',
+         code: 1,
+         data: null,
+         message: 'Password Changed'
+      })
+   } catch (error) {
+
+   }
+})
+
+router.post('/logoutAll',verifyToken,async(req,res,next)=>{
+   try {
+      req.user.Tokens = []
+      await req.user.save()
+      res.send({
+         status:'Success',
+         code:1,
+         data:null,
+         message:'LogedOut from all devices'
+      })
+   } catch (error) {
+      
+   }
+   
+})
+
+router.post('/logout',verifyToken,async(req,res,next)=>{
+   try {
+      req.user.Tokens = req.user.Tokens.filter((token)=>{
+         return token.token != req.token 
+      })
+      await req.user.save()
+      res.send({
+         status:'Success',
+         code:1,
+         data:null,
+         message:'LogedOut'
+      })
+   } catch (error) {
+      
+   }
+   
+})
 
 module.exports = router;

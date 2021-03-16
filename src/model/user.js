@@ -13,13 +13,27 @@ const user = mongoose.Schema({
     },
     phone: {
         type: Number
-    }
+    },
+    Tokens: [
+        {
+            token: {
+                type: String,
+                required: true
+            }
+        }
+    ]
 })
 
 user.methods.generateToken = async function () {
-    const user = this;
-    const token = jwt.sign({ id: user._id }, "Bhanu@8247065499")
-    return token;
+    try {
+        const user = this;
+        const token = jwt.sign({ id: user._id }, "Bhanu@8247065499")
+        user.Tokens = user.Tokens.concat({ token})
+        await user.save()
+        return token;
+    } catch (error) {
+        throw new Error(error)
+    }
 }
 
 
@@ -27,7 +41,9 @@ user.methods.generateToken = async function () {
 user.pre('save', async function (next) {
     try {
         const user = this
-        user.password = await bcrypt.hash(user.password, 8)
+        if(user.isModified('password')){
+            user.password = await bcrypt.hash(user.password, 8)
+        }
         next()
     } catch (error) {
         throw new Error(error.message)
