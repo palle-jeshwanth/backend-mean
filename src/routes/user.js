@@ -243,4 +243,13 @@ router.post('/logout',verifyToken,async(req,res,next)=>{
    
 })
 
+router.get('/me',verifyToken,async(req,res,next)=>{
+   res.send({
+      status:'Success',
+      code:1,
+      data:req.user,
+      message:'User Fetched'
+   })
+})
+
 module.exports = router;

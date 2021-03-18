@@ -14,7 +14,7 @@ const verifyToken = async (req, res, next) => {
         if (!user) {
             throw Error()
         }
-        req.user = user
+        req.user = user 
         req.token = token
         next()
     } catch (error) {

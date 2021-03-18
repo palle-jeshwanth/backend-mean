@@ -55,6 +55,7 @@ user.methods.toJSON = function () {
     const user = this
     const userObj = user.toObject()
     delete userObj.password
+    delete userObj.Tokens
     return userObj
 }
 
